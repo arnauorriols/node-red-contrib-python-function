@@ -1,0 +1,26 @@
+{
+  "name": "node-red-contrib-python-function",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arnauorriols/node-red-contrib-python-function"
+  },
+  "description": "Define a function with Python instead of Javascript",
+  "keywords": [
+    "node-red",
+    "function",
+    "Python",
+    "exec",
+    "polyglot",
+    "hack"
+  ],
+  "author": "Arnau Orriols",
+  "license": "MIT",
+  "node-red": {
+    "nodes": {
+      "python-function": "lib/python-function.js"
+    }
+  },
+  "dependencies": {
+  }
+}

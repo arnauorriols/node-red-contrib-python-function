@@ -1,0 +1,136 @@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-language_tools.js"></script>
+<script type="text/javascript">
+    RED.nodes.registerType('python-function',{
+        category: 'function',
+        color: '#fdd0a2',
+        defaults: {
+            name: {value: ""},
+            func: {value: "\nreturn msg"},
+            outputs: {value: 1}  // Ofuscated way to persist the number of outputs of the node
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "function.png",
+        label: function() {
+            return this.name;
+        },
+        oneditprepare: function() {
+            $( "#node-input-outputs" ).spinner({
+                min:1
+            });
+            var langTools = ace.require('ace/ext/language_tools');
+            this.editor = ace.edit('node-input-func-editor');
+            this.editor.setTheme('ace/theme/tomorrow');
+            this.editor.getSession().setMode('ace/mode/python');
+            this.editor.setValue($("#node-input-func").val(), -1);
+            this.editor.setOptions({
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    highlightSelectedWord: true,
+                    useSoftTabs: true,
+                    tabSize: 4,
+            });
+            var noderedKeywords = [
+                'msg', 'msg.payload', 'node', 'node.send',
+                'node.log', 'node.warn', 'node.error', 'node.status'
+            ];
+            this.editor.completers.push({
+                getCompletions: function (state, session, pos, prefix, callback) {
+                    callback(null, noderedKeywords.map(function (word) {
+                        return {
+                            name: word,
+                            value: word,
+                            score: 0,
+                            meta: 'Node-RED'
+                        };
+                    }));
+                }
+            });
+            this.editor.focus();
+        },
+        oneditsave: function() {
+            var annot = this.editor.getSession().getAnnotations();
+            this.noerr = 0;
+            $("#node-input-noerr").val(0);
+            for (var k=0; k < annot.length; k++) {
+                //console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
+                if (annot[k].type === "error") {
+                    $("#node-input-noerr").val(annot.length);
+                    this.noerr = annot.length;
+                }
+            }
+            $("#node-input-func").val(this.editor.getValue());
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="python-function">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row" style="margin-bottom: 0px;">
+        <label for="node-input-func"><i class="fa fa-wrench"></i> <span>Function</span></label>
+        <input type="hidden" id="node-input-func" autofocus="autofocus">
+        <input type="hidden" id="node-input-noerr">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-func-editor" ></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-outputs"><i class="fa fa-random"></i> <span>Outputs</span></label>
+        <input id="node-input-outputs" style="width: 60px;" value="1">
+    </div>
+    <div class="form-tips"><span>See the Info tab for help writing Python functions</span></div>
+</script>
+
+<script type="text/x-red" data-help-name="python-function">
+    <p>Just like the plain old Javascript function node, but writting Python!</p>
+    <p>All functionality of the javascript function node is to be expected (now or in the near future, or in a parallel universe)</p>
+    <p>Virtually all posible incoming messages are supported, available as a Python dictionary. However bear in mind that all data inside msg that is not a valid JSON data type will be dropped from it permanently</p>
+    <p><pre>THIS IS NOT READY FOR PRODUCTION YET!</pre></p>
+
+    <h2>Usage</h2>
+    <p>A function block where you can write code to do more interesting things.</p>
+    <p>The message is passed in as a Python dictionary called <code>msg</code>.</p>
+    <p>By convention it will have a <code>msg['payload']</code> key containing
+       the body of the message.</p>
+    <h4>Logging and Error Handling</h4>
+    <p>To log any information, or report an error, the following functions are available:</p>
+        <ul>
+            <li><code>node.log("Log")</code></li>
+            <li><code>node.warn("Warning")</code></li>
+            <li><code>node.error("Error")</code></li>
+        </ul>
+    </p>
+    <p>The Catch node can also be used to handle errors. To invoke a Catch node,
+    pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
+    <pre>node.error("Error msg", msg)</pre>
+    <h4>Sending messages</h4>
+    <p>The function can either return the messages it wants to pass on to the next nodes
+    in the flow, or can call <code>node.send(messages)</code>.</p>
+    <p>It can return/send:</p>
+    <ul>
+      <li>a single message dictionary - passed to nodes connected to the first output</li>
+      <li>a list of message dictionaries - passed to nodes connected to the corresponding outputs</li>
+    </ul>
+    <p>If any element of the list is itself a list of messages, multiple
+          messages are sent to the corresponding output.</p>
+    <p>If null is returned, either by itself or as an element of the list, no
+          message is passed on.</p>
+    <p>See the <a target="_new" href="http://nodered.org/docs/writing-functions.html">online documentation</a> for more help.</p>
+
+</script>
