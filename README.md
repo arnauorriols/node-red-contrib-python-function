@@ -15,7 +15,7 @@ Install
 
 Requires Python 2.7 installed in the system. 
 
-`rpm install -g node-red-contrib-python-function`
+`npm install -g node-red-contrib-python-function`
 
 Usage
 -----
