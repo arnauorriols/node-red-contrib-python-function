@@ -1,5 +1,3 @@
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ext-language_tools.js"></script>
 <script type="text/javascript">
     RED.nodes.registerType('python-function',{
         category: 'function',
@@ -21,7 +19,6 @@
             });
             var langTools = ace.require('ace/ext/language_tools');
             this.editor = ace.edit('node-input-func-editor');
-            this.editor.setTheme('ace/theme/tomorrow');
             this.editor.getSession().setMode('ace/mode/python');
             this.editor.setValue($("#node-input-func").val(), -1);
             this.editor.setOptions({
