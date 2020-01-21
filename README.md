@@ -13,7 +13,7 @@ I already told you so.
 Install
 -------
 
-Requires Python 2.7 installed in the system. 
+Requires Python (both 2.x and 3.x are supported) installed in the system. 
 
 `npm install -g node-red-contrib-python-function`
 

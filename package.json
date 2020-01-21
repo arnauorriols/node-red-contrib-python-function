@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-python-function",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/arnauorriols/node-red-contrib-python-function"
@@ -9,7 +9,8 @@
   "keywords": [
     "node-red",
     "function",
-    "Python",
+    "Python2",
+    "Python3",
     "exec",
     "polyglot",
     "hack"
